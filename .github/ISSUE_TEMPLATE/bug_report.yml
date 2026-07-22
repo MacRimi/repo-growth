@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a reproducible problem with Repo Growth.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem. Do not include tokens or private data.
+  - type: input
+    id: version
+    attributes:
+      label: Repo Growth version
+      description: For example, v1 or a full commit SHA.
+      placeholder: v1
+    validations:
+      required: true
+  - type: dropdown
+    id: runner
+    attributes:
+      label: Runner
+      options:
+        - GitHub-hosted Ubuntu
+        - GitHub-hosted macOS
+        - GitHub-hosted Windows
+        - Self-hosted
+        - Local CLI
+    validations:
+      required: true
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Workflow configuration
+      description: Paste the relevant workflow section. Remove secrets and private names.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste a minimal log excerpt with sensitive values removed.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed tokens and private information.
+          required: true

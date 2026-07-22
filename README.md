@@ -245,6 +245,12 @@ npm run demo
 
 The GitHub Action uses Node.js 24. Generated SVGs contain no JavaScript, remote fonts, or external stylesheets.
 
+## Contributing and security
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and pull request guidelines.
+
+Please report vulnerabilities privately by following the process in [SECURITY.md](SECURITY.md).
+
 ## License
 
 Repo Growth is available under the [MIT License](LICENSE).
