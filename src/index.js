@@ -54,7 +54,7 @@ function resolveOptions(argv, env) {
     title: args.title || env.INPUT_TITLE || 'Project growth',
     metrics: parseMetrics(args.metrics || env.INPUT_METRICS || 'stars,forks,downloads'),
     layout: parseLayout(args.layout || env.INPUT_LAYOUT || 'dashboard'),
-    backfill: parseBoolean(args.backfill ?? env.INPUT_BACKFILL ?? 'true', 'backfill'),
+    backfill: parseBoolean(args.backfill ?? env.INPUT_BACKFILL ?? 'false', 'backfill'),
     commit: args.commit === true || (args.commit !== false && isAction && (env.INPUT_COMMIT || 'true').toLowerCase() === 'true'),
     commitMessage: args.commitMessage || env['INPUT_COMMIT-MESSAGE'] || 'chore: update repository growth [skip ci]'
   };

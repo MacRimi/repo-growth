@@ -35,7 +35,7 @@
 | | |
 | --- | --- |
 | **Zero secret setup** | Uses the short-lived `github.token` already provided to every workflow. |
-| **Historical from day one** | Reconstructs currently available star and fork history on its first run. |
+| **Optional historical import** | Can reconstruct currently available star and fork history once with collaborator credentials. |
 | **Repository-owned data** | The complete history remains a readable JSON file in your repository. |
 | **Static and dependable** | Your README displays a local SVG, with no API request at viewing time. |
 | **Honest download totals** | Previously observed downloads survive deleted or replaced release assets. |
@@ -109,7 +109,7 @@ Scheduled GitHub Action
  Commit changed files
 ```
 
-On its first run, Repo Growth uses the repository-scoped `github.token` to read timestamped stars and fork creation dates. Later runs use aggregate counters to append one accurate snapshot per day.
+Daily tracking uses the repository-scoped `github.token` and needs no custom secret. An optional one-time backfill can read timestamped stars and fork creation dates when supplied with an administrator or collaborator token.
 
 > [!IMPORTANT]
 > Existing stars and forks can be reconstructed, but deleted forks and removed stars are no longer present in GitHub's API. Release download history starts when Repo Growth is installed because GitHub does not expose timestamps for individual downloads.
@@ -118,7 +118,7 @@ On its first run, Repo Growth uses the repository-scoped `github.token` to read 
 
 GitHub restricted timestamped stargazer data in July 2026 to repository administrators and collaborators. Public services can no longer reconstruct a repository's star history anonymously.
 
-Repo Growth runs as the repository's own workflow, so its short-lived automatic token has the necessary repository access without a personal token or stored secret. README visitors receive an already-generated image; there is no external API call, tracking request, or expiring URL in the rendering path.
+Repo Growth's normal scheduled collection runs without a personal token or stored secret. GitHub's automatic Actions token is not treated as an administrator or collaborator for the restricted stargazer listing, so historical star backfill requires one-time collaborator credentials. README visitors receive an already-generated image; there is no external API call, tracking request, or expiring URL in the rendering path.
 
 ## Configuration
 
@@ -127,7 +127,7 @@ Repo Growth runs as the repository's own workflow, so its short-lived automatic 
 | `repository` | Current repository | Repository in `owner/name` format |
 | `output` | `assets/repo-growth.svg` | Generated dashboard path |
 | `history` | `.github/repo-growth/history.json` | Persistent data path |
-| `backfill` | `true` | Reconstruct existing star and fork history on the first run |
+| `backfill` | `false` | Reconstruct existing star and fork history once; requires an admin or collaborator token |
 | `title` | `Project growth` | Heading displayed in the SVG |
 | `metrics` | `stars,forks,downloads` | Metrics to display, in the desired order |
 | `layout` | `dashboard` | Generate `dashboard`, `separate`, or `both` outputs |
@@ -144,6 +144,21 @@ For example:
     output: images/project-growth.svg
     metrics: stars,downloads
 ```
+
+### Optional one-time historical import
+
+GitHub requires the credential used for timestamped stargazers to belong to a repository administrator or collaborator. Create a fine-grained, read-only token limited to the target repository, save it temporarily as `REPO_GROWTH_BACKFILL_TOKEN`, and run:
+
+```yaml
+- uses: MacRimi/repo-growth@v1
+  with:
+    backfill: true
+    token: ${{ secrets.REPO_GROWTH_BACKFILL_TOKEN }}
+```
+
+After the successful run, Repo Growth records `backfilledAt` in the history file and will not repeat the import. Remove the secret and the two inputs above; scheduled updates continue with the automatic `github.token`.
+
+Alternatively, run the CLI once from a local environment already authenticated as an administrator or collaborator. The credential is used only for the API request and is never written to generated files.
 
 ### Choose the metrics
 
@@ -196,7 +211,7 @@ GitHub exposes the current count of each release asset, but not its historical d
 <details>
 <summary><strong>Does it require a PAT or repository secret?</strong></summary>
 
-No. The default `github.token` is enough to reconstruct available star and fork history, read repository totals and releases, and commit the generated files.
+No for normal daily tracking. The default `github.token` reads repository totals and releases and commits the generated files. Historical star backfill is optional and requires a one-time administrator or collaborator token because of GitHub's July 2026 restriction.
 </details>
 
 <details>
@@ -209,6 +224,8 @@ No. It displays the SVG committed to the same repository. Repo Growth is not inv
 <summary><strong>What history can the first run reconstruct?</strong></summary>
 
 Repo Growth reconstructs currently existing stars from their `starred_at` timestamps and forks from their creation dates. Removed stars and deleted forks cannot be recovered. Release download history begins with the first run because GitHub only exposes current asset totals.
+
+To request the import, set `backfill: true` and provide a token belonging to a repository administrator or collaborator. After the first successful import, the credential is no longer needed. You can also run the CLI once from an already authenticated local environment so no token is stored in the repository.
 </details>
 
 <details>
