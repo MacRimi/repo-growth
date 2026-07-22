@@ -1,6 +1,6 @@
 {
   "name": "repo-growth",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Track repository growth and generate a modern, dependency-free SVG dashboard.",
   "main": "src/index.js",
   "bin": {
