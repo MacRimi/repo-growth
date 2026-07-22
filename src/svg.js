@@ -15,7 +15,7 @@ function renderSvg({ repository, title = 'Project growth', points, updatedAt, me
   const latest = points.at(-1);
   const first = points[0];
   const width = 1000;
-  const surfaceHeight = 230 + selectedMetrics.length * 138;
+  const surfaceHeight = 230 + selectedMetrics.length * 166;
   const height = surfaceHeight + 76;
 
   const cards = selectedMetrics.map((metric, index) => statCard(metric, latest, first, index, selectedMetrics.length)).join('');
@@ -50,7 +50,7 @@ function renderSvg({ repository, title = 'Project growth', points, updatedAt, me
       }
     </style>
   </defs>
-  <rect class="bg" width="1000" height="720" rx="28"/>
+  <rect class="bg" width="1000" height="${height}" rx="28"/>
   <g transform="translate(42 38)">
     <rect x="0" y="0" width="916" height="${surfaceHeight}" rx="22" class="surface" filter="url(#shadow)"/>
     <text x="30" y="45" class="primary" font-size="26" font-weight="750" letter-spacing="-.5">${escapeXml(title)}</text>
@@ -85,19 +85,18 @@ function statCard(metric, latest, first, index, count) {
 }
 
 function chartPanel(metric, points, index) {
-  const y = 197 + index * 138;
+  const y = 197 + index * 166;
   const left = 220;
-  const top = 19;
+  const top = 20;
   const graphWidth = 616;
-  const graphHeight = 86;
+  const graphHeight = 100;
   const metricPoints = points.filter((point) => point[metric.key] !== null && point[metric.key] !== undefined && Number.isFinite(Number(point[metric.key])));
   const values = metricPoints.map((point) => Number(point[metric.key]));
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
-  const spread = Math.max(maxValue - minValue, 1);
-  const pad = spread * 0.12;
-  const low = Math.max(0, minValue - pad);
-  const high = maxValue + pad;
+  const flatPadding = minValue === maxValue ? Math.max(Math.abs(maxValue) * 0.05, 1) : 0;
+  const low = Math.max(0, minValue - flatPadding);
+  const high = maxValue + flatPadding;
   const firstTime = Date.parse(`${metricPoints[0].date}T00:00:00Z`);
   const lastTime = Date.parse(`${metricPoints.at(-1).date}T00:00:00Z`);
   const coords = values.map((value, pointIndex) => {
@@ -108,20 +107,26 @@ function chartPanel(metric, points, index) {
   });
   const line = coords.map(([x, pointY], pointIndex) => `${pointIndex ? 'L' : 'M'}${x} ${pointY}`).join(' ');
   const area = `${line} L${coords.at(-1)[0]} ${top + graphHeight} L${coords[0][0]} ${top + graphHeight} Z`;
-  const grid = [0, 0.5, 1].map((ratio) => `<line x1="${left}" x2="${left + graphWidth}" y1="${top + graphHeight * ratio}" y2="${top + graphHeight * ratio}" class="grid" stroke-width="1" stroke-dasharray="3 6"/>`).join('');
+  const yTicks = [high, (high + low) / 2, low].map((value, index) => {
+    const tickY = top + graphHeight * index / 2;
+    return `<line x1="${left}" x2="${left + graphWidth}" y1="${tickY}" y2="${tickY}" class="grid" stroke-width="1" stroke-dasharray="3 6"/><text x="${left - 10}" y="${tickY + 4}" text-anchor="end" class="secondary" font-size="9">${compact(Math.round(value))}</text>`;
+  }).join('');
+  const xTicks = timeTicks(firstTime, lastTime).map(({ time, anchor }) => {
+    const tickX = firstTime === lastTime ? left + graphWidth / 2 : left + (time - firstTime) * graphWidth / (lastTime - firstTime);
+    return `<text x="${round(tickX)}" y="143" text-anchor="${anchor}" class="secondary" font-size="9">${escapeXml(axisDate(time))}</text>`;
+  }).join('');
 
   return `<g transform="translate(30 ${y})">
-    <rect width="856" height="122" rx="16" class="panel"/>
+    <rect width="856" height="150" rx="16" class="panel"/>
     <circle cx="20" cy="27" r="5" fill="${metric.color}"/>
     <text x="34" y="31" class="primary" font-size="14" font-weight="700">${metric.label}</text>
     <text x="20" y="62" class="primary" font-size="20" font-weight="750">${compact(values.at(-1))}</text>
     <text x="20" y="83" class="secondary" font-size="11">range ${compact(minValue)}–${compact(maxValue)}</text>
-    ${grid}
+    ${yTicks}
     <path d="${area}" fill="url(#fill-${metric.key})"/>
     <path d="${line}" fill="none" stroke="${metric.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     ${coords.map(([x, pointY], pointIndex) => pointIndex === coords.length - 1 ? `<circle cx="${x}" cy="${pointY}" r="5" fill="${metric.color}" stroke="#fff" stroke-width="2"/>` : '').join('')}
-    <text x="${left}" y="116" class="secondary" font-size="10">${escapeXml(shortDate(metricPoints[0].date))}</text>
-    <text x="${left + graphWidth}" y="116" text-anchor="end" class="secondary" font-size="10">${escapeXml(shortDate(metricPoints.at(-1).date))}</text>
+    ${xTicks}
   </g>`;
 }
 
@@ -137,8 +142,17 @@ function prettyDate(date) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
 }
 
-function shortDate(date) {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+function timeTicks(firstTime, lastTime) {
+  if (firstTime === lastTime) return [{ time: firstTime, anchor: 'middle' }];
+  return [
+    { time: firstTime, anchor: 'start' },
+    { time: firstTime + (lastTime - firstTime) / 2, anchor: 'middle' },
+    { time: lastTime, anchor: 'end' }
+  ];
+}
+
+function axisDate(timestamp) {
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(timestamp));
 }
 
 function prettyTimestamp(timestamp) {

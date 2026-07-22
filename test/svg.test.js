@@ -31,6 +31,15 @@ test('keeps the chart inside the panel right edge', () => {
   assert.doesNotMatch(svg, /x2="8(?:5[7-9]|[6-9]\d)"/);
 });
 
+test('renders dated horizontal ticks and numeric vertical references', () => {
+  const svg = renderSvg({ repository: 'owner/repo', points, metrics: ['stars'] });
+  assert.match(svg, />Jul 20, 2026</);
+  assert.match(svg, />Jul 21, 2026</);
+  assert.match(svg, />Jul 22, 2026</);
+  assert.match(svg, /text-anchor="end" class="secondary" font-size="9">115</);
+  assert.match(svg, /text-anchor="end" class="secondary" font-size="9">100</);
+});
+
 test('ignores unavailable historical downloads and spaces points by date', () => {
   const svg = renderSvg({
     repository: 'owner/repo',
@@ -42,18 +51,18 @@ test('ignores unavailable historical downloads and spaces points by date', () =>
     ]
   });
   assert.match(svg, /range 100–110/);
-  assert.match(svg, />Jul 20</);
-  assert.doesNotMatch(svg, />Jan 1</);
+  assert.match(svg, />Jul 20, 2026</);
+  assert.doesNotMatch(svg, />Jan 1, 2026</);
 });
 
 test('renders only selected metrics and adapts the canvas height', () => {
   const two = renderSvg({ repository: 'owner/repo', points, metrics: ['stars', 'downloads'] });
   const one = renderSvg({ repository: 'owner/repo', points, metrics: ['forks'] });
-  assert.match(two, /height="582"/);
+  assert.match(two, /height="638"/);
   assert.match(two, />Stars</);
   assert.match(two, />Release downloads</);
   assert.doesNotMatch(two, />Forks</);
-  assert.match(one, /height="444"/);
+  assert.match(one, /height="472"/);
   assert.match(one, />Forks</);
   assert.doesNotMatch(one, />Stars</);
 });

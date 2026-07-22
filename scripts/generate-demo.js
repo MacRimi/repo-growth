@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { renderSvg } = require('../src/svg');
 
-const points = Array.from({ length: 18 }, (_, index) => ({
-  date: new Date(Date.UTC(2026, 6, 5 + index)).toISOString().slice(0, 10),
+const points = Array.from({ length: 19 }, (_, index) => ({
+  date: new Date(Date.UTC(2025, index, 15)).toISOString().slice(0, 10),
   stars: 1840 + index * 28 + Math.round(index ** 1.45 * 3),
   forks: 236 + index * 4 + Math.round(index / 3),
   downloads: 28400 + index * 970 + Math.round(index ** 1.35 * 120)
