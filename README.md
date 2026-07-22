@@ -64,7 +64,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: MacRimi/repo-growth@v1
 ```
 
