@@ -1,0 +1,55 @@
+name: Repo Growth
+description: Track stars, forks, and release downloads in a modern SVG dashboard without a personal access token.
+author: MacRimi
+branding:
+  icon: trending-up
+  color: purple
+inputs:
+  token:
+    description: GitHub token. The automatic github.token is sufficient for public repository totals.
+    required: false
+    default: ${{ github.token }}
+  repository:
+    description: Repository in owner/name form.
+    required: false
+    default: ${{ github.repository }}
+  output:
+    description: Path of the generated SVG.
+    required: false
+    default: assets/repo-growth.svg
+  history:
+    description: Path of the persisted history JSON.
+    required: false
+    default: .github/repo-growth/history.json
+  title:
+    description: Dashboard title.
+    required: false
+    default: Project growth
+  metrics:
+    description: Comma-separated metrics to render (stars, forks, downloads).
+    required: false
+    default: stars,forks,downloads
+  layout:
+    description: Output layout (dashboard, separate, or both).
+    required: false
+    default: dashboard
+  commit:
+    description: Commit and push changed output files.
+    required: false
+    default: "true"
+  commit-message:
+    description: Commit message used when generated files change.
+    required: false
+    default: "chore: update repository growth [skip ci]"
+outputs:
+  changed:
+    description: Whether the history or SVG changed.
+  stars:
+    description: Current star count.
+  forks:
+    description: Current fork count.
+  downloads:
+    description: Tracked release asset download count.
+runs:
+  using: node24
+  main: dist/index.js

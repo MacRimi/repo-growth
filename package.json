@@ -1,0 +1,25 @@
+{
+  "name": "repo-growth",
+  "version": "0.1.0",
+  "description": "Track repository growth and generate a modern, dependency-free SVG dashboard.",
+  "main": "src/index.js",
+  "bin": {
+    "repo-growth": "bin/repo-growth.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node scripts/generate-demo.js",
+    "check": "node --check src/index.js && node --check src/svg.js && npm test"
+  },
+  "keywords": [
+    "github-action",
+    "github",
+    "stars",
+    "analytics",
+    "svg"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
