@@ -25,6 +25,12 @@ test('renders a single point without invalid coordinates', () => {
   assert.doesNotMatch(svg, /NaN|Infinity/);
 });
 
+test('keeps the chart inside the panel right edge', () => {
+  const svg = renderSvg({ repository: 'owner/repo', points, metrics: ['stars'] });
+  assert.match(svg, /x2="836"/);
+  assert.doesNotMatch(svg, /x2="8(?:5[7-9]|[6-9]\d)"/);
+});
+
 test('renders only selected metrics and adapts the canvas height', () => {
   const two = renderSvg({ repository: 'owner/repo', points, metrics: ['stars', 'downloads'] });
   const one = renderSvg({ repository: 'owner/repo', points, metrics: ['forks'] });

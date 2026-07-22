@@ -87,7 +87,7 @@ function chartPanel(metric, points, index) {
   const y = 197 + index * 138;
   const left = 220;
   const top = 19;
-  const graphWidth = 650;
+  const graphWidth = 616;
   const graphHeight = 86;
   const values = points.map((point) => Number(point[metric.key]) || 0);
   const minValue = Math.min(...values);
