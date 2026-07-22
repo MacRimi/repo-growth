@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { GitHubClient, validateRepository } = require('./github');
-const { createHistory, normalizeHistory, recordSnapshot } = require('./history');
+const { createHistory, normalizeHistory, recordSnapshot, backfillHistory } = require('./history');
 const { renderSvg } = require('./svg');
 
 async function main(argv = process.argv.slice(2), environment = process.env) {
@@ -14,7 +14,16 @@ async function main(argv = process.argv.slice(2), environment = process.env) {
   const previous = previousText ? normalizeHistory(JSON.parse(previousText), options.repository) : createHistory(options.repository);
   const client = new GitHubClient({ token: options.token });
   const snapshot = await client.collect(options.repository);
-  const history = recordSnapshot(previous, snapshot);
+  let history = recordSnapshot(previous, snapshot);
+  if (options.backfill && !history.backfilledAt) {
+    try {
+      const historical = await client.collectHistorical(options.repository);
+      history = backfillHistory(history, historical);
+      console.log(`Repo Growth: reconstructed ${historical.stars.length} stars and ${historical.forks.length} forks.`);
+    } catch (error) {
+      console.warn(`::warning::Historical backfill skipped: ${error.message}`);
+    }
+  }
   const historyText = `${JSON.stringify(history, null, 2)}\n`;
   const historyChanged = writeIfChanged(options.history, historyText);
   const renderTargets = buildRenderTargets(options);
@@ -45,6 +54,7 @@ function resolveOptions(argv, env) {
     title: args.title || env.INPUT_TITLE || 'Project growth',
     metrics: parseMetrics(args.metrics || env.INPUT_METRICS || 'stars,forks,downloads'),
     layout: parseLayout(args.layout || env.INPUT_LAYOUT || 'dashboard'),
+    backfill: parseBoolean(args.backfill ?? env.INPUT_BACKFILL ?? 'true', 'backfill'),
     commit: args.commit === true || (args.commit !== false && isAction && (env.INPUT_COMMIT || 'true').toLowerCase() === 'true'),
     commitMessage: args.commitMessage || env['INPUT_COMMIT-MESSAGE'] || 'chore: update repository growth [skip ci]'
   };
@@ -57,6 +67,8 @@ function parseArgs(argv) {
     const argument = argv[index];
     if (argument === '--commit') result.commit = true;
     else if (argument === '--no-commit') result.commit = false;
+    else if (argument === '--backfill') result.backfill = true;
+    else if (argument === '--no-backfill') result.backfill = false;
     else if (keys[argument]) {
       if (!argv[index + 1]) throw new Error(`${argument} requires a value.`);
       result[keys[argument]] = argv[++index];
@@ -66,6 +78,12 @@ function parseArgs(argv) {
     } else throw new Error(`Unknown argument: ${argument}`);
   }
   return result;
+}
+
+function parseBoolean(value, name) {
+  if (value === true || String(value).toLowerCase() === 'true') return true;
+  if (value === false || String(value).toLowerCase() === 'false') return false;
+  throw new Error(`${name} must be true or false.`);
 }
 
 function parseMetrics(value) {
@@ -141,4 +159,4 @@ function setOutputs(env, values) {
   fs.appendFileSync(env.GITHUB_OUTPUT, `${lines}\n`);
 }
 
-module.exports = { main, parseArgs, resolveOptions, parseMetrics, parseLayout, buildRenderTargets, withMetricSuffix, writeIfChanged };
+module.exports = { main, parseArgs, resolveOptions, parseMetrics, parseLayout, parseBoolean, buildRenderTargets, withMetricSuffix, writeIfChanged };

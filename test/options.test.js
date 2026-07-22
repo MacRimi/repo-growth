@@ -3,13 +3,16 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { buildRenderTargets, parseLayout, parseMetrics, withMetricSuffix } = require('../src/index');
+const { buildRenderTargets, parseLayout, parseMetrics, parseBoolean, withMetricSuffix } = require('../src/index');
 
 test('parses and validates selected metrics and layout', () => {
   assert.deepEqual(parseMetrics('stars, downloads,stars'), ['stars', 'downloads']);
   assert.equal(parseLayout('BOTH'), 'both');
   assert.throws(() => parseMetrics('stars,views'), /Unknown metrics/);
   assert.throws(() => parseLayout('tiles'), /dashboard, separate, or both/);
+  assert.equal(parseBoolean('true', 'backfill'), true);
+  assert.equal(parseBoolean(false, 'backfill'), false);
+  assert.throws(() => parseBoolean('sometimes', 'backfill'), /true or false/);
 });
 
 test('builds dashboard and separate output filenames', () => {

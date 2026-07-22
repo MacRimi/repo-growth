@@ -72,7 +72,8 @@ function statCard(metric, latest, first, index, count) {
   const cardWidth = (856 - gap * (count - 1)) / count;
   const x = 30 + index * (cardWidth + gap);
   const value = Number(latest[metric.key]) || 0;
-  const delta = value - (Number(first[metric.key]) || 0);
+  const firstMetricPoint = firstAvailableMetricPoint(metric, [first, latest]);
+  const delta = value - (Number(firstMetricPoint[metric.key]) || 0);
   const deltaText = delta === 0 ? 'No change yet' : `${delta > 0 ? '+' : '−'}${compact(Math.abs(delta))} tracked`;
   return `<g transform="translate(${x} 92)">
     <rect width="${cardWidth}" height="86" rx="16" class="panel"/>
@@ -89,15 +90,19 @@ function chartPanel(metric, points, index) {
   const top = 19;
   const graphWidth = 616;
   const graphHeight = 86;
-  const values = points.map((point) => Number(point[metric.key]) || 0);
+  const metricPoints = points.filter((point) => point[metric.key] !== null && point[metric.key] !== undefined && Number.isFinite(Number(point[metric.key])));
+  const values = metricPoints.map((point) => Number(point[metric.key]));
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const spread = Math.max(maxValue - minValue, 1);
   const pad = spread * 0.12;
   const low = Math.max(0, minValue - pad);
   const high = maxValue + pad;
+  const firstTime = Date.parse(`${metricPoints[0].date}T00:00:00Z`);
+  const lastTime = Date.parse(`${metricPoints.at(-1).date}T00:00:00Z`);
   const coords = values.map((value, pointIndex) => {
-    const x = left + (points.length === 1 ? graphWidth / 2 : pointIndex * graphWidth / (points.length - 1));
+    const pointTime = Date.parse(`${metricPoints[pointIndex].date}T00:00:00Z`);
+    const x = left + (firstTime === lastTime ? graphWidth / 2 : (pointTime - firstTime) * graphWidth / (lastTime - firstTime));
     const pointY = top + graphHeight - ((value - low) / Math.max(high - low, 1)) * graphHeight;
     return [round(x), round(pointY)];
   });
@@ -115,9 +120,13 @@ function chartPanel(metric, points, index) {
     <path d="${area}" fill="url(#fill-${metric.key})"/>
     <path d="${line}" fill="none" stroke="${metric.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     ${coords.map(([x, pointY], pointIndex) => pointIndex === coords.length - 1 ? `<circle cx="${x}" cy="${pointY}" r="5" fill="${metric.color}" stroke="#fff" stroke-width="2"/>` : '').join('')}
-    <text x="${left}" y="116" class="secondary" font-size="10">${escapeXml(shortDate(points[0].date))}</text>
-    <text x="${left + graphWidth}" y="116" text-anchor="end" class="secondary" font-size="10">${escapeXml(shortDate(points.at(-1).date))}</text>
+    <text x="${left}" y="116" class="secondary" font-size="10">${escapeXml(shortDate(metricPoints[0].date))}</text>
+    <text x="${left + graphWidth}" y="116" text-anchor="end" class="secondary" font-size="10">${escapeXml(shortDate(metricPoints.at(-1).date))}</text>
   </g>`;
+}
+
+function firstAvailableMetricPoint(metric, points) {
+  return points.find((point) => point[metric.key] !== null && point[metric.key] !== undefined) || points.at(-1);
 }
 
 function compact(value) {

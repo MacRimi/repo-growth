@@ -21,6 +21,10 @@ inputs:
     description: Path of the persisted history JSON.
     required: false
     default: .github/repo-growth/history.json
+  backfill:
+    description: Reconstruct existing star and fork history on the first run using the automatic GitHub token.
+    required: false
+    default: "true"
   title:
     description: Dashboard title.
     required: false

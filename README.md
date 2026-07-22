@@ -35,6 +35,7 @@
 | | |
 | --- | --- |
 | **Zero secret setup** | Uses the short-lived `github.token` already provided to every workflow. |
+| **Historical from day one** | Reconstructs currently available star and fork history on its first run. |
 | **Repository-owned data** | The complete history remains a readable JSON file in your repository. |
 | **Static and dependable** | Your README displays a local SVG, with no API request at viewing time. |
 | **Honest download totals** | Previously observed downloads survive deleted or replaced release assets. |
@@ -108,16 +109,16 @@ Scheduled GitHub Action
  Commit changed files
 ```
 
-Repo Growth reads aggregate counters instead of the restricted list of individual stargazers. This is why it can operate without a personal access token.
+On its first run, Repo Growth uses the repository-scoped `github.token` to read timestamped stars and fork creation dates. Later runs use aggregate counters to append one accurate snapshot per day.
 
 > [!IMPORTANT]
-> Tracking starts when Repo Growth is installed. It cannot reconstruct the star, fork, or download history from before the first run.
+> Existing stars and forks can be reconstructed, but deleted forks and removed stars are no longer present in GitHub's API. Release download history starts when Repo Growth is installed because GitHub does not expose timestamps for individual downloads.
 
 ## Why this approach?
 
-GitHub restricted access to timestamped stargazer data in July 2026. Public services can no longer reconstruct a repository's complete star history unless an owner supplies a personal token.
+GitHub restricted timestamped stargazer data in July 2026 to repository administrators and collaborators. Public services can no longer reconstruct a repository's star history anonymously.
 
-Repo Growth avoids that requirement entirely. Collection happens inside your repository, and README visitors receive an already-generated image. There is no external API call, tracking request, or expiring URL in the rendering path.
+Repo Growth runs as the repository's own workflow, so its short-lived automatic token has the necessary repository access without a personal token or stored secret. README visitors receive an already-generated image; there is no external API call, tracking request, or expiring URL in the rendering path.
 
 ## Configuration
 
@@ -126,6 +127,7 @@ Repo Growth avoids that requirement entirely. Collection happens inside your rep
 | `repository` | Current repository | Repository in `owner/name` format |
 | `output` | `assets/repo-growth.svg` | Generated dashboard path |
 | `history` | `.github/repo-growth/history.json` | Persistent data path |
+| `backfill` | `true` | Reconstruct existing star and fork history on the first run |
 | `title` | `Project growth` | Heading displayed in the SVG |
 | `metrics` | `stars,forks,downloads` | Metrics to display, in the desired order |
 | `layout` | `dashboard` | Generate `dashboard`, `separate`, or `both` outputs |
@@ -194,7 +196,7 @@ GitHub exposes the current count of each release asset, but not its historical d
 <details>
 <summary><strong>Does it require a PAT or repository secret?</strong></summary>
 
-No. The default `github.token` is enough to read repository totals and releases. The workflow requires `contents: write` only so it can commit the JSON and SVG.
+No. The default `github.token` is enough to reconstruct available star and fork history, read repository totals and releases, and commit the generated files.
 </details>
 
 <details>
@@ -204,9 +206,9 @@ No. It displays the SVG committed to the same repository. Repo Growth is not inv
 </details>
 
 <details>
-<summary><strong>Why does the first chart contain only one point?</strong></summary>
+<summary><strong>What history can the first run reconstruct?</strong></summary>
 
-GitHub does not expose historical aggregate snapshots. The chart becomes more useful as the scheduled workflow records new points.
+Repo Growth reconstructs currently existing stars from their `starred_at` timestamps and forks from their creation dates. Removed stars and deleted forks cannot be recovered. Release download history begins with the first run because GitHub only exposes current asset totals.
 </details>
 
 <details>

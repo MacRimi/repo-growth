@@ -31,6 +31,21 @@ test('keeps the chart inside the panel right edge', () => {
   assert.doesNotMatch(svg, /x2="8(?:5[7-9]|[6-9]\d)"/);
 });
 
+test('ignores unavailable historical downloads and spaces points by date', () => {
+  const svg = renderSvg({
+    repository: 'owner/repo',
+    metrics: ['downloads'],
+    points: [
+      { date: '2026-01-01', downloads: null },
+      { date: '2026-07-20', downloads: 100 },
+      { date: '2026-07-22', downloads: 110 }
+    ]
+  });
+  assert.match(svg, /range 100–110/);
+  assert.match(svg, />Jul 20</);
+  assert.doesNotMatch(svg, />Jan 1</);
+});
+
 test('renders only selected metrics and adapts the canvas height', () => {
   const two = renderSvg({ repository: 'owner/repo', points, metrics: ['stars', 'downloads'] });
   const one = renderSvg({ repository: 'owner/repo', points, metrics: ['forks'] });

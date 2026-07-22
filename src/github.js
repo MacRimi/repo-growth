@@ -10,9 +10,9 @@ class GitHubClient {
     this.apiRoot = apiRoot.replace(/\/$/, '');
   }
 
-  async request(path) {
+  async request(path, { accept = 'application/vnd.github+json' } = {}) {
     const headers = {
-      Accept: 'application/vnd.github+json',
+      Accept: accept,
       'X-GitHub-Api-Version': '2022-11-28',
       'User-Agent': 'repo-growth-action'
     };
@@ -54,12 +54,26 @@ class GitHubClient {
     };
   }
 
-  async paginate(path) {
+  async collectHistorical(repository) {
+    validateRepository(repository);
+    const [stargazers, forks] = await Promise.all([
+      this.paginate(`/repos/${repository}/stargazers?per_page=100`, {
+        accept: 'application/vnd.github.star+json'
+      }),
+      this.paginate(`/repos/${repository}/forks?per_page=100`)
+    ]);
+    return {
+      stars: stargazers.map((item) => item.starred_at).filter(Boolean),
+      forks: forks.map((item) => item.created_at).filter(Boolean)
+    };
+  }
+
+  async paginate(path, requestOptions) {
     const separator = path.includes('?') ? '&' : '?';
     const base = path.replace(/([?&])page=\d+(&|$)/, '$1').replace(/[?&]$/, '');
     const items = [];
     for (let page = 1; ; page += 1) {
-      const batch = await this.request(`${base}${separator}page=${page}`);
+      const batch = await this.request(`${base}${separator}page=${page}`, requestOptions);
       if (!Array.isArray(batch)) throw new Error(`Expected a list from ${path}.`);
       items.push(...batch);
       if (batch.length < 100) return items;
