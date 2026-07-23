@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/repo-growth.png" alt="Repo Growth — repository metrics, your data, no external service" width="1000">
+</p>
+
 <h1 align="center">Repo Growth</h1>
 
 <p align="center">
@@ -22,14 +26,6 @@
   <a href="#frequently-asked-questions">FAQ</a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/MacRimi/repo-growth">
-    <img src="assets/repo-growth-demo.svg" alt="Repo Growth dashboard preview" width="900">
-  </a>
-  <br>
-  <sub>Preview generated with example data. The dashboard adapts automatically to GitHub's light and dark themes.</sub>
-</p>
-
 ## At a glance
 
 | | |
@@ -41,6 +37,14 @@
 | **Honest download totals** | Previously observed downloads survive deleted or replaced release assets. |
 | **Balanced visualization** | Each metric has its own chart, so different scales remain legible. |
 | **Modern by default** | Responsive sizing, accessible labels, and automatic light/dark appearance. |
+
+<p align="center">
+  <a href="https://github.com/MacRimi/repo-growth">
+    <img src="assets/repo-growth-demo.svg" alt="Repo Growth dashboard preview" width="900">
+  </a>
+  <br>
+  <sub>Preview generated with example data. The dashboard adapts automatically to GitHub's light and dark themes.</sub>
+</p>
 
 ## Quick start
 

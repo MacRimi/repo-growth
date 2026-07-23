@@ -15,7 +15,7 @@ function renderSvg({ repository, title = 'Project growth', points, updatedAt, me
   const latest = points.at(-1);
   const first = points[0];
   const width = 1000;
-  const surfaceHeight = 230 + selectedMetrics.length * 166;
+  const surfaceHeight = 230 + selectedMetrics.length * 217;
   const height = surfaceHeight + 76;
 
   const cards = selectedMetrics.map((metric, index) => statCard(metric, latest, first, index, selectedMetrics.length)).join('');
@@ -85,11 +85,11 @@ function statCard(metric, latest, first, index, count) {
 }
 
 function chartPanel(metric, points, index) {
-  const y = 197 + index * 166;
+  const y = 197 + index * 217;
   const left = 220;
   const top = 20;
   const graphWidth = 616;
-  const graphHeight = 100;
+  const graphHeight = 150;
   const metricPoints = points.filter((point) => point[metric.key] !== null && point[metric.key] !== undefined && Number.isFinite(Number(point[metric.key])));
   const values = metricPoints.map((point) => Number(point[metric.key]));
   const minValue = Math.min(...values);
@@ -113,11 +113,11 @@ function chartPanel(metric, points, index) {
   }).join('');
   const xTicks = timeTicks(firstTime, lastTime).map(({ time, anchor }) => {
     const tickX = firstTime === lastTime ? left + graphWidth / 2 : left + (time - firstTime) * graphWidth / (lastTime - firstTime);
-    return `<text x="${round(tickX)}" y="143" text-anchor="${anchor}" class="secondary" font-size="9">${escapeXml(axisDate(time))}</text>`;
+    return `<text x="${round(tickX)}" y="194" text-anchor="${anchor}" class="secondary" font-size="9">${escapeXml(axisDate(time))}</text>`;
   }).join('');
 
   return `<g transform="translate(30 ${y})">
-    <rect width="856" height="150" rx="16" class="panel"/>
+    <rect width="856" height="201" rx="16" class="panel"/>
     <circle cx="20" cy="27" r="5" fill="${metric.color}"/>
     <text x="34" y="31" class="primary" font-size="14" font-weight="700">${metric.label}</text>
     <text x="20" y="62" class="primary" font-size="20" font-weight="750">${compact(values.at(-1))}</text>

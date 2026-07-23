@@ -58,11 +58,11 @@ test('ignores unavailable historical downloads and spaces points by date', () =>
 test('renders only selected metrics and adapts the canvas height', () => {
   const two = renderSvg({ repository: 'owner/repo', points, metrics: ['stars', 'downloads'] });
   const one = renderSvg({ repository: 'owner/repo', points, metrics: ['forks'] });
-  assert.match(two, /height="638"/);
+  assert.match(two, /height="740"/);
   assert.match(two, />Stars</);
   assert.match(two, />Release downloads</);
   assert.doesNotMatch(two, />Forks</);
-  assert.match(one, /height="472"/);
+  assert.match(one, /height="523"/);
   assert.match(one, />Forks</);
   assert.doesNotMatch(one, />Stars</);
 });
