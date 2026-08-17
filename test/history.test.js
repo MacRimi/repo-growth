@@ -102,3 +102,20 @@ test('normalizes older histories without clone traffic', () => {
   assert.deepEqual(history.totals, { downloads: 7, clones: 0 });
   assert.deepEqual(history.traffic, { cloneDays: {} });
 });
+
+test('preserves release asset state when downloads are not collected', () => {
+  let history = createHistory('owner/repo');
+  history = recordSnapshot(history, {
+    stars: 1,
+    forks: 0,
+    assets: [{ id: '1', name: 'tool', release: 'v1', count: 25 }]
+  }, new Date('2026-08-14T00:00:00Z'));
+  history = recordSnapshot(history, {
+    stars: 2,
+    forks: 0,
+    assets: null
+  }, new Date('2026-08-15T00:00:00Z'));
+
+  assert.equal(history.totals.downloads, 25);
+  assert.equal(history.assets['1'].active, true);
+});

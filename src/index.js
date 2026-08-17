@@ -16,7 +16,9 @@ async function main(argv = process.argv.slice(2), environment = process.env) {
   const previousText = readOptional(options.history);
   const previous = previousText ? normalizeHistory(JSON.parse(previousText), options.repository) : createHistory(options.repository);
   const client = new GitHubClient({ token: options.token });
-  const snapshot = await client.collect(options.repository);
+  const snapshot = await client.collect(options.repository, {
+    includeDownloads: options.metrics.includes('downloads')
+  });
   if (options.metrics.includes('clones')) {
     try {
       const trafficClient = new GitHubClient({ token: options.trafficToken });

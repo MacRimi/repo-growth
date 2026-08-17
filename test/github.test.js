@@ -65,6 +65,27 @@ test('collects the daily Git clone traffic window', async () => {
   ]);
 });
 
+test('skips release requests when downloads are not selected', async () => {
+  const requested = [];
+  const fetchImpl = async (url) => {
+    requested.push(url);
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ stargazers_count: 42, forks_count: 7 }),
+      text: async () => ''
+    };
+  };
+  const client = new GitHubClient({ token: 'test-token', fetchImpl, apiRoot: 'https://api.github.test' });
+
+  assert.deepEqual(await client.collect('owner/repo', { includeDownloads: false }), {
+    stars: 42,
+    forks: 7,
+    assets: null
+  });
+  assert.deepEqual(requested, ['https://api.github.test/repos/owner/repo']);
+});
+
 test('validates repository names', () => {
   assert.doesNotThrow(() => validateRepository('MacRimi/ProxMenux'));
   assert.throws(() => validateRepository('not a repository'), /owner\/name/);

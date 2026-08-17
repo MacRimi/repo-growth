@@ -95,25 +95,27 @@ function recordSnapshot(historyValue, snapshot, now = new Date()) {
   const previousState = JSON.stringify({ totals: history.totals, assets: history.assets, traffic: history.traffic, points: history.points });
   const seen = new Set();
 
-  for (const asset of snapshot.assets) {
-    seen.add(asset.id);
-    const previous = history.assets[asset.id];
-    if (!previous) {
-      history.totals.downloads += asset.count;
-    } else if (asset.count > previous.lastSeen) {
-      history.totals.downloads += asset.count - previous.lastSeen;
+  if (Array.isArray(snapshot.assets)) {
+    for (const asset of snapshot.assets) {
+      seen.add(asset.id);
+      const previous = history.assets[asset.id];
+      if (!previous) {
+        history.totals.downloads += asset.count;
+      } else if (asset.count > previous.lastSeen) {
+        history.totals.downloads += asset.count - previous.lastSeen;
+      }
+      history.assets[asset.id] = {
+        name: asset.name,
+        release: asset.release,
+        lastSeen: asset.count,
+        maximumSeen: Math.max(asset.count, Number(previous?.maximumSeen) || 0),
+        active: true
+      };
     }
-    history.assets[asset.id] = {
-      name: asset.name,
-      release: asset.release,
-      lastSeen: asset.count,
-      maximumSeen: Math.max(asset.count, Number(previous?.maximumSeen) || 0),
-      active: true
-    };
-  }
 
-  for (const [id, asset] of Object.entries(history.assets)) {
-    if (!seen.has(id)) asset.active = false;
+    for (const [id, asset] of Object.entries(history.assets)) {
+      if (!seen.has(id)) asset.active = false;
+    }
   }
 
   const date = now.toISOString().slice(0, 10);

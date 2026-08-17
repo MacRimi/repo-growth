@@ -26,9 +26,16 @@ class GitHubClient {
     return response.json();
   }
 
-  async collect(repository) {
+  async collect(repository, { includeDownloads = true } = {}) {
     validateRepository(repository);
     const repo = await this.request(`/repos/${repository}`);
+    if (!includeDownloads) {
+      return {
+        stars: Number(repo.stargazers_count) || 0,
+        forks: Number(repo.forks_count) || 0,
+        assets: null
+      };
+    }
     const releases = await this.paginate(`/repos/${repository}/releases?per_page=100`);
     const assets = [];
 
