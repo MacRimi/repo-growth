@@ -3,11 +3,12 @@
 const API_ROOT = 'https://api.github.com';
 
 class GitHubClient {
-  constructor({ token, fetchImpl = globalThis.fetch, apiRoot = API_ROOT } = {}) {
+  constructor({ token, fetchImpl = globalThis.fetch, apiRoot = API_ROOT, sleepImpl = defaultSleep } = {}) {
     if (!fetchImpl) throw new Error('This program requires Node.js 20 or newer.');
     this.token = token;
     this.fetch = fetchImpl;
     this.apiRoot = apiRoot.replace(/\/$/, '');
+    this.sleep = sleepImpl;
   }
 
   async request(path, { accept = 'application/vnd.github+json' } = {}) {
@@ -18,12 +19,16 @@ class GitHubClient {
     };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
 
-    const response = await this.fetch(`${this.apiRoot}${path}`, { headers });
-    if (!response.ok) {
+    const transientStatuses = new Set([500, 502, 503, 504]);
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const response = await this.fetch(`${this.apiRoot}${path}`, { headers });
+      if (response.ok) return response.json();
       const body = await response.text();
-      throw new Error(`GitHub API ${response.status} for ${path}: ${body.slice(0, 240)}`);
+      if (!transientStatuses.has(response.status) || attempt === 3) {
+        throw new Error(`GitHub API ${response.status} for ${path}: ${body.slice(0, 240)}`);
+      }
+      await this.sleep(1000 * (2 ** attempt));
     }
-    return response.json();
   }
 
   async collect(repository, { includeDownloads = true } = {}) {
@@ -99,6 +104,10 @@ class GitHubClient {
       if (batch.length < 100) return items;
     }
   }
+}
+
+function defaultSleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function validateRepository(repository) {

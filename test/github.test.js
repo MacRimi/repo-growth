@@ -86,6 +86,33 @@ test('skips release requests when downloads are not selected', async () => {
   assert.deepEqual(requested, ['https://api.github.test/repos/owner/repo']);
 });
 
+test('retries transient GitHub API failures with exponential delays', async () => {
+  const statuses = [503, 502, 200];
+  const delays = [];
+  const fetchImpl = async () => {
+    const status = statuses.shift();
+    return {
+      ok: status === 200,
+      status,
+      json: async () => ({ stargazers_count: 1, forks_count: 0 }),
+      text: async () => 'temporarily unavailable'
+    };
+  };
+  const client = new GitHubClient({
+    token: 'test-token',
+    fetchImpl,
+    apiRoot: 'https://api.github.test',
+    sleepImpl: async (milliseconds) => delays.push(milliseconds)
+  });
+
+  assert.deepEqual(await client.collect('owner/repo', { includeDownloads: false }), {
+    stars: 1,
+    forks: 0,
+    assets: null
+  });
+  assert.deepEqual(delays, [1000, 2000]);
+});
+
 test('validates repository names', () => {
   assert.doesNotThrow(() => validateRepository('MacRimi/ProxMenux'));
   assert.throws(() => validateRepository('not a repository'), /owner\/name/);
