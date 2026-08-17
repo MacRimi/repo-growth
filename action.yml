@@ -1,5 +1,5 @@
 name: Repo Growth
-description: Track stars, forks, and release downloads in a modern SVG dashboard without a personal access token.
+description: Track stars, forks, release downloads, and optional Git clones in a modern SVG dashboard.
 author: MacRimi
 branding:
   icon: trending-up
@@ -9,6 +9,9 @@ inputs:
     description: GitHub token. The automatic github.token is sufficient for public repository totals.
     required: false
     default: ${{ github.token }}
+  traffic-token:
+    description: Optional token with Administration read access, required when the clones metric is selected.
+    required: false
   repository:
     description: Repository in owner/name form.
     required: false
@@ -30,7 +33,7 @@ inputs:
     required: false
     default: Project growth
   metrics:
-    description: Comma-separated metrics to render (stars, forks, downloads).
+    description: Comma-separated metrics to render (stars, forks, downloads, clones).
     required: false
     default: stars,forks,downloads
   layout:
@@ -54,6 +57,8 @@ outputs:
     description: Current fork count.
   downloads:
     description: Tracked release asset download count.
+  clones:
+    description: Tracked full repository clone count.
 runs:
   using: node24
   main: dist/index.js

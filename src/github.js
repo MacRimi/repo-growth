@@ -68,6 +68,19 @@ class GitHubClient {
     };
   }
 
+  async collectClones(repository) {
+    validateRepository(repository);
+    const traffic = await this.request(`/repos/${repository}/traffic/clones?per=day`);
+    if (!traffic || !Array.isArray(traffic.clones)) {
+      throw new Error('Expected clone traffic with a daily breakdown.');
+    }
+    return traffic.clones.map((item) => ({
+      date: String(item.timestamp || '').slice(0, 10),
+      count: Math.max(0, Number(item.count) || 0),
+      uniques: Math.max(0, Number(item.uniques) || 0)
+    }));
+  }
+
   async paginate(path, requestOptions) {
     const separator = path.includes('?') ? '&' : '?';
     const base = path.replace(/([?&])page=\d+(&|$)/, '$1').replace(/[?&]$/, '');

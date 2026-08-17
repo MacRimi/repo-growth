@@ -59,3 +59,46 @@ test('reconstructs cumulative star and fork history without inventing download h
 test('rejects a history file belonging to another repository', () => {
   assert.throws(() => normalizeHistory({ version: 1, repository: 'a/b' }, 'c/d'), /belongs to a\/b/);
 });
+
+test('merges overlapping clone windows by UTC date without double counting', () => {
+  let history = createHistory('owner/repo');
+  history = recordSnapshot(history, {
+    stars: 10,
+    forks: 2,
+    assets: [],
+    clones: [
+      { date: '2026-08-14', count: 4, uniques: 3 },
+      { date: '2026-08-15', count: 10, uniques: 9 }
+    ]
+  }, new Date('2026-08-15T04:00:00Z'));
+  history = recordSnapshot(history, {
+    stars: 11,
+    forks: 2,
+    assets: [],
+    clones: [
+      { date: '2026-08-14', count: 4, uniques: 3 },
+      { date: '2026-08-15', count: 12, uniques: 10 },
+      { date: '2026-08-16', count: 5, uniques: 4 }
+    ]
+  }, new Date('2026-08-16T04:00:00Z'));
+
+  assert.equal(history.totals.clones, 21);
+  assert.deepEqual(history.traffic.cloneDays['2026-08-15'], { count: 12, uniques: 10 });
+  assert.deepEqual(history.points.map(({ date, clones }) => ({ date, clones })), [
+    { date: '2026-08-14', clones: 4 },
+    { date: '2026-08-15', clones: 16 },
+    { date: '2026-08-16', clones: 21 }
+  ]);
+});
+
+test('normalizes older histories without clone traffic', () => {
+  const history = normalizeHistory({
+    version: 1,
+    repository: 'owner/repo',
+    totals: { downloads: 7 },
+    points: [{ date: '2026-08-01', stars: 1, forks: 0, downloads: 7 }]
+  }, 'owner/repo');
+
+  assert.deepEqual(history.totals, { downloads: 7, clones: 0 });
+  assert.deepEqual(history.traffic, { cloneDays: {} });
+});

@@ -3,8 +3,10 @@
 const METRICS = [
   { key: 'stars', label: 'Stars', color: '#8b5cf6', soft: '#c4b5fd' },
   { key: 'forks', label: 'Forks', color: '#06b6d4', soft: '#67e8f9' },
-  { key: 'downloads', label: 'Release downloads', color: '#10b981', soft: '#6ee7b7' }
+  { key: 'downloads', label: 'Release downloads', color: '#10b981', soft: '#6ee7b7' },
+  { key: 'clones', label: 'Git clones', color: '#f59e0b', soft: '#fcd34d' }
 ];
+const DEFAULT_METRICS = ['stars', 'forks', 'downloads'];
 const PROJECT_URL = 'https://github.com/MacRimi/repo-growth';
 
 function renderSvg({ repository, title = 'Project growth', points, updatedAt, metrics }) {
@@ -18,7 +20,7 @@ function renderSvg({ repository, title = 'Project growth', points, updatedAt, me
   const surfaceHeight = 230 + selectedMetrics.length * 217;
   const height = surfaceHeight + 76;
 
-  const cards = selectedMetrics.map((metric, index) => statCard(metric, latest, first, index, selectedMetrics.length)).join('');
+  const cards = selectedMetrics.map((metric, index) => statCard(metric, latest, points, index, selectedMetrics.length)).join('');
   const charts = selectedMetrics.map((metric, index) => chartPanel(metric, points, index)).join('');
   const range = first.date === latest.date ? `Tracking since ${prettyDate(first.date)}` : `${prettyDate(first.date)} – ${prettyDate(latest.date)}`;
 
@@ -67,20 +69,23 @@ function renderSvg({ repository, title = 'Project growth', points, updatedAt, me
 `;
 }
 
-function statCard(metric, latest, first, index, count) {
+function statCard(metric, latest, points, index, count) {
   const gap = 20;
   const cardWidth = (856 - gap * (count - 1)) / count;
   const x = 30 + index * (cardWidth + gap);
   const value = Number(latest[metric.key]) || 0;
-  const firstMetricPoint = firstAvailableMetricPoint(metric, [first, latest]);
+  const firstMetricPoint = firstAvailableMetricPoint(metric, points);
   const delta = value - (Number(firstMetricPoint[metric.key]) || 0);
-  const deltaText = delta === 0 ? 'No change yet' : `${delta > 0 ? '+' : '−'}${compact(Math.abs(delta))} tracked`;
+  const compactCard = count >= 4;
+  const deltaText = delta === 0
+    ? (compactCard ? 'No change' : 'No change yet')
+    : `${delta > 0 ? '+' : '−'}${compact(Math.abs(delta))}${compactCard ? '' : ' tracked'}`;
   return `<g transform="translate(${x} 92)">
     <rect width="${cardWidth}" height="86" rx="16" class="panel"/>
     <rect x="16" y="17" width="6" height="52" rx="3" fill="${metric.color}"/>
     <text x="38" y="34" class="secondary" font-size="12" font-weight="650" letter-spacing=".3">${metric.label.toUpperCase()}</text>
-    <text x="38" y="64" class="primary" font-size="27" font-weight="760" letter-spacing="-.5">${compact(value)}</text>
-    <text x="${cardWidth - 26}" y="63" text-anchor="end" fill="${metric.color}" font-size="11" font-weight="650">${deltaText}</text>
+    <text x="38" y="64" class="primary" font-size="${compactCard ? 24 : 27}" font-weight="760" letter-spacing="-.5">${compact(value)}</text>
+    <text x="${cardWidth - 26}" y="63" text-anchor="end" fill="${metric.color}" font-size="${compactCard ? 10 : 11}" font-weight="650">${deltaText}</text>
   </g>`;
 }
 
@@ -170,7 +175,7 @@ function escapeXml(value) {
 
 function resolveMetrics(metrics) {
   const keys = metrics == null
-    ? METRICS.map((metric) => metric.key)
+    ? DEFAULT_METRICS
     : (Array.isArray(metrics) ? metrics : String(metrics).split(',')).map((key) => key.trim().toLowerCase()).filter(Boolean);
   const uniqueKeys = [...new Set(keys)];
   if (uniqueKeys.length === 0) throw new Error('At least one metric must be selected.');
@@ -179,4 +184,4 @@ function resolveMetrics(metrics) {
   return uniqueKeys.map((key) => METRICS.find((metric) => metric.key === key));
 }
 
-module.exports = { METRICS, PROJECT_URL, renderSvg, resolveMetrics, escapeXml };
+module.exports = { METRICS, DEFAULT_METRICS, PROJECT_URL, renderSvg, resolveMetrics, escapeXml };

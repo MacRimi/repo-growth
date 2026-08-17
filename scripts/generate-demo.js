@@ -8,7 +8,8 @@ const points = Array.from({ length: 19 }, (_, index) => ({
   date: new Date(Date.UTC(2025, index, 15)).toISOString().slice(0, 10),
   stars: 1840 + index * 28 + Math.round(index ** 1.45 * 3),
   forks: 236 + index * 4 + Math.round(index / 3),
-  downloads: 28400 + index * 970 + Math.round(index ** 1.35 * 120)
+  downloads: 28400 + index * 970 + Math.round(index ** 1.35 * 120),
+  clones: 9200 + index * 410 + Math.round(index ** 1.5 * 95)
 }));
 const output = path.resolve('assets/repo-growth-demo.svg');
 fs.mkdirSync(path.dirname(output), { recursive: true });
@@ -16,6 +17,7 @@ fs.writeFileSync(output, renderSvg({
   repository: 'MacRimi/ProxMenux',
   title: 'Project growth',
   points,
-  updatedAt: '2026-07-22T08:00:00Z'
+  updatedAt: '2026-07-22T08:00:00Z',
+  metrics: ['stars', 'forks', 'downloads', 'clones']
 }));
 console.log(`Generated ${output}`);

@@ -10,10 +10,21 @@ const { renderSvg } = require('./svg');
 async function main(argv = process.argv.slice(2), environment = process.env) {
   const options = resolveOptions(argv, environment);
   validateRepository(options.repository);
+  if (options.metrics.includes('clones') && !options.trafficToken) {
+    throw new Error('The clones metric requires traffic-token with Administration: read access to this repository.');
+  }
   const previousText = readOptional(options.history);
   const previous = previousText ? normalizeHistory(JSON.parse(previousText), options.repository) : createHistory(options.repository);
   const client = new GitHubClient({ token: options.token });
   const snapshot = await client.collect(options.repository);
+  if (options.metrics.includes('clones')) {
+    try {
+      const trafficClient = new GitHubClient({ token: options.trafficToken });
+      snapshot.clones = await trafficClient.collectClones(options.repository);
+    } catch (error) {
+      throw new Error(`Could not collect Git clones. Check traffic-token permissions. ${error.message}`);
+    }
+  }
   let history = recordSnapshot(previous, snapshot);
   if (options.backfill && !history.backfilledAt) {
     try {
@@ -37,8 +48,10 @@ async function main(argv = process.argv.slice(2), environment = process.env) {
   const changed = historyChanged || outputChanged;
 
   if (changed && options.commit) commitFiles([options.history, ...renderTargets.map((target) => target.filename)], options.commitMessage);
-  setOutputs(environment, { changed, stars: snapshot.stars, forks: snapshot.forks, downloads: history.totals.downloads });
-  console.log(`Repo Growth: ${snapshot.stars} stars, ${snapshot.forks} forks, ${history.totals.downloads} downloads.`);
+  setOutputs(environment, { changed, stars: snapshot.stars, forks: snapshot.forks, downloads: history.totals.downloads, clones: history.totals.clones });
+  const summary = [`${snapshot.stars} stars`, `${snapshot.forks} forks`, `${history.totals.downloads} downloads`];
+  if (options.metrics.includes('clones')) summary.push(`${history.totals.clones} Git clones`);
+  console.log(`Repo Growth: ${summary.join(', ')}.`);
   console.log(changed ? `Updated ${renderTargets.map((target) => target.filename).join(', ')} and ${options.history}.` : 'Everything is already up to date.');
   return { changed, snapshot, history };
 }
@@ -49,6 +62,7 @@ function resolveOptions(argv, env) {
   return {
     repository: args.repository || env.INPUT_REPOSITORY || env.GITHUB_REPOSITORY,
     token: args.token || env.INPUT_TOKEN || env.GITHUB_TOKEN || '',
+    trafficToken: args.trafficToken || env['INPUT_TRAFFIC-TOKEN'] || '',
     output: path.resolve(args.output || env.INPUT_OUTPUT || 'assets/repo-growth.svg'),
     history: path.resolve(args.history || env.INPUT_HISTORY || '.github/repo-growth/history.json'),
     title: args.title || env.INPUT_TITLE || 'Project growth',
@@ -62,7 +76,7 @@ function resolveOptions(argv, env) {
 
 function parseArgs(argv) {
   const result = {};
-  const keys = { '--repo': 'repository', '--token': 'token', '--output': 'output', '--history': 'history', '--title': 'title', '--metrics': 'metrics', '--layout': 'layout', '--commit-message': 'commitMessage' };
+  const keys = { '--repo': 'repository', '--token': 'token', '--traffic-token': 'trafficToken', '--output': 'output', '--history': 'history', '--title': 'title', '--metrics': 'metrics', '--layout': 'layout', '--commit-message': 'commitMessage' };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === '--commit') result.commit = true;
@@ -73,7 +87,7 @@ function parseArgs(argv) {
       if (!argv[index + 1]) throw new Error(`${argument} requires a value.`);
       result[keys[argument]] = argv[++index];
     } else if (argument === '--help' || argument === '-h') {
-      console.log('Usage: repo-growth --repo owner/name [--metrics list] [--layout dashboard|separate|both] [--output file] [--commit]');
+      console.log('Usage: repo-growth --repo owner/name [--metrics list] [--traffic-token token] [--layout dashboard|separate|both] [--output file] [--commit]');
       process.exit(0);
     } else throw new Error(`Unknown argument: ${argument}`);
   }
@@ -88,7 +102,7 @@ function parseBoolean(value, name) {
 
 function parseMetrics(value) {
   const metrics = [...new Set(String(value).split(',').map((metric) => metric.trim().toLowerCase()).filter(Boolean))];
-  const allowed = new Set(['stars', 'forks', 'downloads']);
+  const allowed = new Set(['stars', 'forks', 'downloads', 'clones']);
   if (metrics.length === 0) throw new Error('At least one metric must be selected.');
   const unknown = metrics.filter((metric) => !allowed.has(metric));
   if (unknown.length) throw new Error(`Unknown metrics: ${unknown.join(', ')}.`);

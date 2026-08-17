@@ -43,6 +43,28 @@ test('collects timestamped stars and forks for the initial backfill', async () =
   });
 });
 
+test('collects the daily Git clone traffic window', async () => {
+  const response = {
+    count: 15,
+    uniques: 13,
+    clones: [
+      { timestamp: '2026-08-14T00:00:00Z', count: 4, uniques: 3 },
+      { timestamp: '2026-08-15T00:00:00Z', count: 11, uniques: 10 }
+    ]
+  };
+  const fetchImpl = async (url, options) => {
+    assert.equal(options.headers.Authorization, 'Bearer traffic-token');
+    assert.match(url, /\/repos\/owner\/repo\/traffic\/clones\?per=day$/);
+    return { ok: true, status: 200, json: async () => response, text: async () => '' };
+  };
+  const client = new GitHubClient({ token: 'traffic-token', fetchImpl, apiRoot: 'https://api.github.test' });
+
+  assert.deepEqual(await client.collectClones('owner/repo'), [
+    { date: '2026-08-14', count: 4, uniques: 3 },
+    { date: '2026-08-15', count: 11, uniques: 10 }
+  ]);
+});
+
 test('validates repository names', () => {
   assert.doesNotThrow(() => validateRepository('MacRimi/ProxMenux'));
   assert.throws(() => validateRepository('not a repository'), /owner\/name/);

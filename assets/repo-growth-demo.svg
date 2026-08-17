@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="957" viewBox="0 0 1000 957" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1174" viewBox="0 0 1000 1174" role="img" aria-labelledby="title desc">
   <title id="title">Project growth for MacRimi/ProxMenux</title>
-  <desc id="desc">Repository growth dashboard showing stars, forks, release downloads over time.</desc>
+  <desc id="desc">Repository growth dashboard showing stars, forks, release downloads, git clones over time.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fafafa"/><stop offset="1" stop-color="#f4f4f5"/>
     </linearGradient>
-    <linearGradient id="fill-stars" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".24"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient><linearGradient id="fill-forks" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06b6d4" stop-opacity=".24"/><stop offset="1" stop-color="#06b6d4" stop-opacity="0"/></linearGradient><linearGradient id="fill-downloads" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981" stop-opacity=".24"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fill-stars" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".24"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient><linearGradient id="fill-forks" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06b6d4" stop-opacity=".24"/><stop offset="1" stop-color="#06b6d4" stop-opacity="0"/></linearGradient><linearGradient id="fill-downloads" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10b981" stop-opacity=".24"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></linearGradient><linearGradient id="fill-clones" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity=".24"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#18181b" flood-opacity=".08"/></filter>
     <style>
       :root { color-scheme: light dark; }
@@ -26,30 +26,36 @@
       }
     </style>
   </defs>
-  <rect class="bg" width="1000" height="957" rx="28"/>
+  <rect class="bg" width="1000" height="1174" rx="28"/>
   <g transform="translate(42 38)">
-    <rect x="0" y="0" width="916" height="881" rx="22" class="surface" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="916" height="1098" rx="22" class="surface" filter="url(#shadow)"/>
     <text x="30" y="45" class="primary" font-size="26" font-weight="750" letter-spacing="-.5">Project growth</text>
     <text x="30" y="70" class="secondary" font-size="14">MacRimi/ProxMenux · Jan 15, 2025 – Jul 15, 2026</text>
     <g transform="translate(740 25)"><rect width="146" height="30" rx="15" fill="#8b5cf6" fill-opacity=".12"/><circle cx="17" cy="15" r="4" fill="#8b5cf6"/><text x="30" y="20" fill="#8b5cf6" font-size="11" font-weight="700" letter-spacing="1">LOCAL HISTORY</text></g>
     <g transform="translate(30 92)">
-    <rect width="272" height="86" rx="16" class="panel"/>
+    <rect width="199" height="86" rx="16" class="panel"/>
     <rect x="16" y="17" width="6" height="52" rx="3" fill="#8b5cf6"/>
     <text x="38" y="34" class="secondary" font-size="12" font-weight="650" letter-spacing=".3">STARS</text>
-    <text x="38" y="64" class="primary" font-size="27" font-weight="760" letter-spacing="-.5">2,542</text>
-    <text x="246" y="63" text-anchor="end" fill="#8b5cf6" font-size="11" font-weight="650">+702 tracked</text>
-  </g><g transform="translate(322 92)">
-    <rect width="272" height="86" rx="16" class="panel"/>
+    <text x="38" y="64" class="primary" font-size="24" font-weight="760" letter-spacing="-.5">2,542</text>
+    <text x="173" y="63" text-anchor="end" fill="#8b5cf6" font-size="10" font-weight="650">+702</text>
+  </g><g transform="translate(249 92)">
+    <rect width="199" height="86" rx="16" class="panel"/>
     <rect x="16" y="17" width="6" height="52" rx="3" fill="#06b6d4"/>
     <text x="38" y="34" class="secondary" font-size="12" font-weight="650" letter-spacing=".3">FORKS</text>
-    <text x="38" y="64" class="primary" font-size="27" font-weight="760" letter-spacing="-.5">314</text>
-    <text x="246" y="63" text-anchor="end" fill="#06b6d4" font-size="11" font-weight="650">+78 tracked</text>
-  </g><g transform="translate(614 92)">
-    <rect width="272" height="86" rx="16" class="panel"/>
+    <text x="38" y="64" class="primary" font-size="24" font-weight="760" letter-spacing="-.5">314</text>
+    <text x="173" y="63" text-anchor="end" fill="#06b6d4" font-size="10" font-weight="650">+78</text>
+  </g><g transform="translate(468 92)">
+    <rect width="199" height="86" rx="16" class="panel"/>
     <rect x="16" y="17" width="6" height="52" rx="3" fill="#10b981"/>
     <text x="38" y="34" class="secondary" font-size="12" font-weight="650" letter-spacing=".3">RELEASE DOWNLOADS</text>
-    <text x="38" y="64" class="primary" font-size="27" font-weight="760" letter-spacing="-.5">51.8K</text>
-    <text x="246" y="63" text-anchor="end" fill="#10b981" font-size="11" font-weight="650">+23.4K tracked</text>
+    <text x="38" y="64" class="primary" font-size="24" font-weight="760" letter-spacing="-.5">51.8K</text>
+    <text x="173" y="63" text-anchor="end" fill="#10b981" font-size="10" font-weight="650">+23.4K</text>
+  </g><g transform="translate(687 92)">
+    <rect width="199" height="86" rx="16" class="panel"/>
+    <rect x="16" y="17" width="6" height="52" rx="3" fill="#f59e0b"/>
+    <text x="38" y="34" class="secondary" font-size="12" font-weight="650" letter-spacing=".3">GIT CLONES</text>
+    <text x="38" y="64" class="primary" font-size="24" font-weight="760" letter-spacing="-.5">23.8K</text>
+    <text x="173" y="63" text-anchor="end" fill="#f59e0b" font-size="10" font-weight="650">+14.6K</text>
   </g>
     <g transform="translate(30 197)">
     <rect width="856" height="201" rx="16" class="panel"/>
@@ -84,10 +90,21 @@
     <path d="M220 170 L255 163 L286.6 155.6 L321.5 148 L355.4 140.1 L390.4 132.2 L424.2 124.1 L459.2 115.8 L494.2 107.5 L528 99.1 L563 90.6 L596.8 82 L631.8 73.4 L666.8 64.6 L698.4 55.8 L733.3 47 L767.2 38 L802.2 29 L836 20" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="836" cy="20" r="5" fill="#10b981" stroke="#fff" stroke-width="2"/>
     <text x="220" y="194" text-anchor="start" class="secondary" font-size="9">Jan 15, 2025</text><text x="528" y="194" text-anchor="middle" class="secondary" font-size="9">Oct 15, 2025</text><text x="836" y="194" text-anchor="end" class="secondary" font-size="9">Jul 15, 2026</text>
+  </g><g transform="translate(30 848)">
+    <rect width="856" height="201" rx="16" class="panel"/>
+    <circle cx="20" cy="27" r="5" fill="#f59e0b"/>
+    <text x="34" y="31" class="primary" font-size="14" font-weight="700">Git clones</text>
+    <text x="20" y="62" class="primary" font-size="20" font-weight="750">23.8K</text>
+    <text x="20" y="83" class="secondary" font-size="11">range 9,200–23.8K</text>
+    <line x1="220" x2="836" y1="20" y2="20" class="grid" stroke-width="1" stroke-dasharray="3 6"/><text x="210" y="24" text-anchor="end" class="secondary" font-size="9">23.8K</text><line x1="220" x2="836" y1="95" y2="95" class="grid" stroke-width="1" stroke-dasharray="3 6"/><text x="210" y="99" text-anchor="end" class="secondary" font-size="9">16.5K</text><line x1="220" x2="836" y1="170" y2="170" class="grid" stroke-width="1" stroke-dasharray="3 6"/><text x="210" y="174" text-anchor="end" class="secondary" font-size="9">9,200</text>
+    <path d="M220 170 L255 164.8 L286.6 158.8 L321.5 152.3 L355.4 145.4 L390.4 138.1 L424.2 130.5 L459.2 122.6 L494.2 114.3 L528 105.9 L563 97.2 L596.8 88.3 L631.8 79.1 L666.8 69.7 L698.4 60.2 L733.3 50.4 L767.2 40.4 L802.2 30.3 L836 20 L836 170 L220 170 Z" fill="url(#fill-clones)"/>
+    <path d="M220 170 L255 164.8 L286.6 158.8 L321.5 152.3 L355.4 145.4 L390.4 138.1 L424.2 130.5 L459.2 122.6 L494.2 114.3 L528 105.9 L563 97.2 L596.8 88.3 L631.8 79.1 L666.8 69.7 L698.4 60.2 L733.3 50.4 L767.2 40.4 L802.2 30.3 L836 20" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="836" cy="20" r="5" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="220" y="194" text-anchor="start" class="secondary" font-size="9">Jan 15, 2025</text><text x="528" y="194" text-anchor="middle" class="secondary" font-size="9">Oct 15, 2025</text><text x="836" y="194" text-anchor="end" class="secondary" font-size="9">Jul 15, 2026</text>
   </g>
-    <text x="30" y="862" class="secondary" font-size="11">Updated Jul 22, 2026</text>
+    <text x="30" y="1079" class="secondary" font-size="11">Updated Jul 22, 2026</text>
     <a href="https://github.com/MacRimi/repo-growth" target="_blank" aria-label="Open the Repo Growth project">
-      <text x="886" y="862" fill="#8b5cf6" text-anchor="end" font-size="13" font-weight="700">Generated by Repo Growth ↗</text>
+      <text x="886" y="1079" fill="#8b5cf6" text-anchor="end" font-size="13" font-weight="700">Generated by Repo Growth ↗</text>
     </a>
   </g>
 </svg>

@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  Track stars, forks, and release downloads from your own repository.<br>
-  No personal access token. No external service. No hosted database.
+  Track stars, forks, release downloads, and optional Git clones from your own repository.<br>
+  No external service. No hosted database. No personal token for the default metrics.
 </p>
 
 <p align="center">
@@ -35,6 +35,7 @@
 | **Repository-owned data** | The complete history remains a readable JSON file in your repository. |
 | **Static and dependable** | Your README displays a local SVG, with no API request at viewing time. |
 | **Honest download totals** | Previously observed downloads survive deleted or replaced release assets. |
+| **Optional Git clone history** | Preserve daily full-clone traffic before GitHub's 14-day window expires. |
 | **Balanced visualization** | Each metric has its own chart, so different scales remain legible. |
 | **Modern by default** | Responsive sizing, accessible labels, and automatic light/dark appearance. |
 
@@ -101,7 +102,8 @@ Scheduled GitHub Action
  GitHub REST API totals
    ├── Stars
    ├── Forks
-   └── Release assets
+   ├── Release assets
+   └── Git clones (optional)
           │
           ▼
  Persist history.json
@@ -113,7 +115,7 @@ Scheduled GitHub Action
  Commit changed files
 ```
 
-Daily tracking uses the repository-scoped `github.token` and needs no custom secret. An optional one-time backfill can read timestamped stars and fork creation dates when supplied with an administrator or collaborator token.
+Daily tracking of the default metrics uses the repository-scoped `github.token` and needs no custom secret. Git clone traffic is optional and needs a dedicated token with read access to repository administration. An optional one-time backfill can read timestamped stars and fork creation dates when supplied with administrator or collaborator credentials.
 
 > [!IMPORTANT]
 > Existing stars and forks can be reconstructed, but deleted forks and removed stars are no longer present in GitHub's API. Release download history starts when Repo Growth is installed because GitHub does not expose timestamps for individual downloads.
@@ -133,11 +135,12 @@ Repo Growth's normal scheduled collection runs without a personal token or store
 | `history` | `.github/repo-growth/history.json` | Persistent data path |
 | `backfill` | `false` | Reconstruct existing star and fork history once; requires an admin or collaborator token |
 | `title` | `Project growth` | Heading displayed in the SVG |
-| `metrics` | `stars,forks,downloads` | Metrics to display, in the desired order |
+| `metrics` | `stars,forks,downloads` | Metrics to display, in the desired order; add `clones` to track Git clones |
 | `layout` | `dashboard` | Generate `dashboard`, `separate`, or `both` outputs |
 | `commit` | `true` | Commit and push changed files |
 | `commit-message` | `chore: update repository growth [skip ci]` | Automated commit message |
 | `token` | `github.token` | Authentication token; no custom secret is normally needed |
+| `traffic-token` | — | Token with repository `Administration: read`; required when `clones` is selected |
 
 For example:
 
@@ -174,7 +177,28 @@ Display any metric or combination by separating their names with commas:
     metrics: stars,downloads
 ```
 
-The combined dashboard adapts its height and card widths automatically. One metric uses the full canvas; two metrics share the available space.
+The combined dashboard adapts its height and card widths automatically to the selected metric count.
+
+### Track Git clones
+
+GitHub exposes full repository clones, excluding fetches, as a rolling 14-day daily breakdown. Repo Growth merges those overlapping daily windows by UTC date and keeps the observations in the repository, building a cumulative history without double counting.
+
+Create a fine-grained personal access token limited to the repository with **Administration: read**, save it as `REPO_GROWTH_TRAFFIC_TOKEN`, and opt in to the metric:
+
+```yaml
+- uses: MacRimi/repo-growth@v1
+  with:
+    metrics: stars,forks,downloads,clones
+    traffic-token: ${{ secrets.REPO_GROWTH_TRAFFIC_TOKEN }}
+```
+
+The automatic `github.token` still handles the normal API requests and repository commit. The traffic token is only used to read clone traffic and must remain configured for continued collection. A GitHub App installation token with the same repository permission can be used instead.
+
+The first successful run imports the currently available window of up to 14 days. Later runs replace overlapping dates with GitHub's latest values and preserve dates that have fallen out of the API window. If collection stops for more than 14 days, the missing interval cannot be reconstructed.
+
+“Git clones” is a repository-wide metric: clones of every branch are combined and GitHub does not provide a per-branch breakdown. For projects whose installer clones the repository, it can be a strong installation proxy, but it can also include manual clones, repeated installations, CI, and other tooling. A successful clone does not prove that an installation completed.
+
+GitHub also returns daily unique cloners. Repo Growth preserves those raw daily values in `history.json`, but does not add them into a lifetime total because the same person can appear on multiple days.
 
 ### Generate individual charts
 
@@ -215,7 +239,7 @@ GitHub exposes the current count of each release asset, but not its historical d
 <details>
 <summary><strong>Does it require a PAT or repository secret?</strong></summary>
 
-No for normal daily tracking. The default `github.token` reads repository totals and releases and commits the generated files. Historical star backfill is optional and requires a one-time administrator or collaborator token because of GitHub's July 2026 restriction.
+No for normal daily tracking. The default `github.token` reads repository totals and releases and commits the generated files. Historical star backfill is optional and requires a one-time administrator or collaborator token because of GitHub's July 2026 restriction. Git clone tracking is also optional and requires a persistent token with repository `Administration: read` because GitHub protects its traffic API.
 </details>
 
 <details>
